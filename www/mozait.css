@@ -1,0 +1,174 @@
+/* ============= mozait.css =========== */
+
+body {
+  background-color: #aaaaaa;
+  color: #433126;
+}
+
+input[type="button"] {
+  background-color: #fecb5e; 
+  box-shadow: 2px 2px 10px #888888;
+  margin: 2px 5px;
+  padding: 2px 4px;
+  font: 13px sans-serif;
+  text-decoration: none;
+  border: 1px solid #fee9aa;
+  border-radius: 5px;
+  color: #624838;
+  height: 24px;
+}
+
+select {
+  background-color: #fecb5e; 
+  box-shadow: 2px 2px 10px #888888;
+  margin: 2px 5px;
+  padding: 2px 4px;
+  font: 13px sans-serif;
+  text-decoration: none;
+  border: 1px solid #fee9aa;
+  border-radius: 5px;
+  color: #624838;
+  font: 13px sans-serif;
+}
+
+#divMain {
+  text-align: center;
+}
+
+#divTitle {
+  text-align: center;
+  font-size: 25px;
+  margin: 10px;
+}
+
+#divSubTitle {
+  text-align: center;
+  font-size: 18px;
+}
+
+#divMsgOut {
+  margin: auto;
+  text-align: center;
+}
+
+#divInfoOut {
+  margin: auto;
+  margin-top: 100px;
+  text-align: center;
+  display: block;
+}
+
+#divInfoSrc {
+  margin: auto;
+  margin-top: 100px;
+  text-align: center;
+  display: block;
+}
+
+#imgOut {
+  margin: auto;
+  max-height: 450px;
+  max-width: 450px;
+}
+
+#imgWait {
+  margin: auto;
+  width: 50px;
+  height: 50px;
+}
+  
+#imgWaitSrc {
+  margin: auto;
+  width: 50px;
+  height: 50px;
+}
+  
+#imgSrc {
+  margin: auto;
+  max-height: 450px;
+  max-width: 450px;
+}
+
+#divFooter {
+  text-align: center;
+  font-size: 15px;
+  margin: auto;
+  margin-top: 20px;
+}
+
+#divBoard {
+  margin: auto;
+}
+
+#divCmd {
+  margin: auto;
+  margin-top: 10px;
+}
+
+.divTool {
+  width: 500px;
+  height: 500px;
+  border: 1px solid #888888;
+  background-color: #cccccc;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#divSettings {
+  width: 100%;
+  margin: auto;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  visibility: hidden;
+}
+
+#divSettingsContent {
+  margin: auto;
+  margin-top: 40px;
+  width: 600px;
+  height: 250px;
+  border: 1px solid #888888;
+  background-color: #dddddd;
+  box-shadow: 0px 0px 15px #555555;
+  text-align: center;
+  overflow: auto;
+}
+
+#imgSettingsClose {
+  width: 50px;
+  height: 50px;
+  float: right;
+}
+
+#divSettingsTitle {
+  font-size: 25px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.divOneSetting {
+  margin: 10px;
+  padding-left: 20px;
+  text-align: center;
+}
+
+.imgSetting {
+  height: 200px;
+}
+
+.rng {
+  vertical-align: middle;
+}
+
+.rng::-webkit-slider-runnable-track {
+  background: #eeeeee;
+  width: 100px;
+  border-radius: 5px;
+}
+
+.rng::-moz-range-track {
+  background: #eeeeee;
+  width: 100px;
+  border-radius: 5px;
+}
