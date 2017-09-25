@@ -138,6 +138,14 @@
           <input type = "range" min = "0" max = "20" value = "2"
             id = "rngMargin" class = "rng" onChange = "SetMargin();">
         </div>
+        <div class = "divOneSetting">
+          If the image is too abstract, try to reduce the size of 
+          largest dots.
+        </div>
+        <div class = "divOneSetting">
+          If the image contains too much empty space, try to increase 
+          the blurriness.
+        </div>
       </div>
     </div>
       
