@@ -6,3 +6,5 @@ The representation is made by packing circles of fixed sizes, starting with the 
 The web application allows the user to use the software in a straightforward way. After downloading a source image and selecting the value of parameters, the user gets the result image in one click. The web application limits the size of source images to less than 500x500 pixels to avoid very long computation time and load on the server. Images are deleted when the user leaves the page to protect his privacy.
 
 http://www.bayashiinjapan.net/MozaIt/
+
+MozaIt has two external dependancies: JQuery which can be found here: https://jquery.com/download/ and animate.css, wich can be found here: https://daneden.github.io/animate.css/
