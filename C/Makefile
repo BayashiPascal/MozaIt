@@ -6,8 +6,8 @@ LIBPATH=/home/bayashi/Coding/Include
 
 all : mozait
 
-mozait: main.o mozait.o Makefile $(LIBPATH)/tgapaint.o $(LIBPATH)/gset.o
-	gcc  $(OPTIONS) main.o $(LIBPATH)/tgapaint.o $(LIBPATH)/gset.o mozait.o -o mozait -lm
+mozait: main.o mozait.o Makefile $(LIBPATH)/tgapaint.o $(LIBPATH)/gset.o $(LIBPATH)/pbmath.o $(LIBPATH)/bcurve.o
+	gcc  $(OPTIONS) main.o $(LIBPATH)/tgapaint.o $(LIBPATH)/gset.o $(LIBPATH)/pbmath.o $(LIBPATH)/bcurve.o mozait.o -o mozait -lm
 
 main.o : main.c mozait.h Makefile
 	gcc $(OPTIONS) -I$(INCPATH) -c main.c

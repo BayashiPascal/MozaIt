@@ -14,12 +14,12 @@
 // Check if a tile of siwe 'size' centered at 'pos' is possible for 
 // image 'src' and mask 'mask'
 // Return true if possible, false else
-bool MozaItCheckPos(MozaIt *moz, short *pos, float size, bool *mask, 
-  TGA *src);
+bool MozaItCheckPos(MozaIt *moz, VecShort *pos, float size, 
+  bool *mask, TGA *src);
 
 // Draw one tile of siwe 'siwe' centered at 'pos' in TGA 'tga' and update
 // the mask 'mask'
-void MozaItDrawTile(MozaIt *moz, short *pos, float size, bool *mask, 
+void MozaItDrawTile(MozaIt *moz, VecShort *pos, float size, bool *mask, 
   TGA *src, TGA *tga);
   
 // ================ Functions implementation ====================
@@ -123,9 +123,11 @@ TGA* MozaItProcess(MozaIt *moz, TGA *src) {
   if (moz == NULL || src == NULL)
     return NULL;
   // Declare a variable to memorize the dimensions of the TGA
-  short dim[2];
-  dim[0] = src->_header->_width;
-  dim[1] = src->_header->_height;
+  VecShort *dim = VecShortCreate(2);
+  if (dim == NULL)
+    return NULL;
+  VecSet(dim, 0, src->_header->_width);
+  VecSet(dim, 1, src->_header->_height);
   // Declare a variable to memorize the background color
   TGAPixel *pixel = NULL;
   // Set the background color
@@ -140,35 +142,42 @@ TGA* MozaItProcess(MozaIt *moz, TGA *src) {
     pixel = TGAGetWhitePixel();
   }
   // If we coudln't create the pixel for the background color
-  if (pixel == NULL)
+  if (pixel == NULL) {
     // Stop here
+    VecFree(&dim);
     return NULL;
+  }
   // Create the result TGA
   TGA *tga = TGACreate(dim, pixel); 
   // If we couldn't create the tga
-  if (tga == NULL)
+  if (tga == NULL) {
     // Stop here
+    VecFree(&dim);
+    TGAPixelFree(&pixel);
     return NULL;
+  }
   // Declare a variable to memorize pixels painted
-  bool *mask = (bool*)malloc(sizeof(bool) * dim[0] * dim[1]);
+  bool *mask = (bool*)malloc(sizeof(bool) * VecGet(dim, 0) * VecGet(dim, 1));
   // If we couldn't allocate memory for the mask
   if (mask == NULL) {
     // Free memory
-    TGAFreePixel(&pixel);
+    TGAPixelFree(&pixel);
     TGAFree(&tga);
+    VecFree(&dim);
     // Stop here
     return NULL;
   }
   // Initialize the mask
-  for (int i = 0; i < dim[0] * dim[1]; ++i)
+  for (int i = VecGet(dim, 0) * VecGet(dim, 1); i--;)
     mask[i] = false;
   // Declare a pencil to paint on the result TGA
   TGAPencil *pen = TGAGetPencil();
-  // If we couldn't allocate memory for the mask
-  if (mask == NULL) {
+  // If we couldn't allocate memory for the pen
+  if (pen == NULL) {
     // Free memory
-    TGAFreePixel(&pixel);
+    TGAPixelFree(&pixel);
     TGAFree(&tga);
+    VecFree(&dim);
     // Stop here
     return NULL; 
   }
@@ -182,7 +191,7 @@ TGA* MozaItProcess(MozaIt *moz, TGA *src) {
   // thanks to the skipping of pixels in intersection when we achieve
   // a tile placement
   int axis[2];
-  if (dim[0] > dim[1]) {
+  if (VecGet(dim, 0) > VecGet(dim, 1)) {
     axis[0] = 0;
     axis[1] = 1;
   } else {
@@ -199,13 +208,25 @@ TGA* MozaItProcess(MozaIt *moz, TGA *src) {
     // For each possible position of this tile
     // Step by 2 to speed up the process without decreasing the quality
     // of the result
-    short pos[2];
-    for (pos[axis[1]] = r; pos[axis[1]] <= dim[axis[1]] - r; 
-      pos[axis[1]] += 2) { 
-      for (pos[axis[0]] = r; pos[axis[0]] <= dim[axis[0]] - r; 
-        pos[axis[0]] += 2) { 
+    VecShort *pos = VecShortCreate(2);
+    if (pos == NULL) {
+      // Free memory
+      TGAPixelFree(&pixel);
+      TGAFree(&tga);
+      VecFree(&dim);
+      TGAPencilFree(&pen);
+      // Stop here
+      return NULL; 
+    }
+    for (VecSet(pos, axis[1], r); 
+      VecGet(pos, axis[1]) <= VecGet(dim, axis[1]) - r; 
+      VecSet(pos, axis[1], VecGet(pos, axis[1]) + 2)) { 
+      for (VecSet(pos, axis[0], r); 
+        VecGet(pos, axis[0]) <= VecGet(dim, axis[0]) - r; 
+        VecSet(pos, axis[0], VecGet(pos, axis[0]) + 2)) { 
         // Get the index of this position
-        int index = pos[1] * src->_header->_width + pos[0];
+        int index = VecGet(pos, 1) * src->_header->_width + 
+          VecGet(pos, 0);
         // If this position is free
         if (mask[index] == false && MozaItCheckPos(moz, pos, size, mask, src) == true) {
           // Draw the tile
@@ -213,17 +234,19 @@ TGA* MozaItProcess(MozaIt *moz, TGA *src) {
           // Update the number of tiles
           ++nbTile;
           // Skip the next pixels which are in intersection with the tile
-          pos[axis[0]] += (short)floor(size * 2);
+          VecSet(pos, axis[0], VecGet(pos, axis[0]) + 
+            (short)floor(size * 2));
         }
       }
     }
-    //printf("%d tiles of size %.3f\n", nbTile, size);
+    VecFree(&pos);
   }
   // Free memory
-  TGAFreePixel(&pixel);
+  TGAPixelFree(&pixel);
+  VecFree(&dim);
   free(mask);
   mask = NULL;
-  TGAFreePencil(&pen);
+  TGAPencilFree(&pen);
   // Return the result TGA
   return tga;
 }
@@ -231,7 +254,7 @@ TGA* MozaItProcess(MozaIt *moz, TGA *src) {
 // Check if a tile of radius 'size' centered at 'pos' is possible for 
 // image 'src' and mask 'mask'
 // Return true if possible, false else
-bool MozaItCheckPos(MozaIt *moz, short *pos, float size, bool *mask, 
+bool MozaItCheckPos(MozaIt *moz, VecShort *pos, float size, bool *mask, 
   TGA *src) { 
   // Declare a variable to memorize the size of the square covering the 
   // tile
@@ -244,15 +267,19 @@ bool MozaItCheckPos(MozaIt *moz, short *pos, float size, bool *mask,
   // Get the pixel in the source image at center of tile
   TGAPixel *pixelSrc = TGAGetPix(src, pos);
   // For each pixel in the square covering the tile
-  short p[2];
-  for (p[0] = pos[0] - r; p[0] <= pos[0] + r && maskOk == true; 
-    ++(p[0])) {
-    for (p[1] = pos[1] - r; p[1] <= pos[1] + r && maskOk == true; 
-      ++(p[1])) {
+  VecShort *p = VecShortCreate(2);
+  if (p == NULL)
+    return false;
+  for (VecSet(p, 0, VecGet(pos, 0) - r); 
+    VecGet(p, 0) <= VecGet(pos, 0) + r && maskOk == true; 
+    VecSet(p, 0, VecGet(p, 0) + 1)) {
+    for (VecSet(p, 1, VecGet(pos, 1) - r); 
+      VecGet(p, 1) <= VecGet(pos, 1) + r && maskOk == true; 
+      VecSet(p, 1, VecGet(p, 1) + 1)) {
       // Get the index of this position
-      int index = p[1] * src->_header->_width + p[0];
+      int index = VecGet(p, 1) * src->_header->_width + VecGet(p, 0);
       // Calculate the distance to the center
-      float d = sqrt(pow(pos[0] - p[0], 2.0) + pow(pos[1] - p[1], 2.0));
+      float d = sqrt(pow(VecGet(pos, 0) - VecGet(p, 0), 2.0) + pow(VecGet(pos, 1) - VecGet(p, 1), 2.0));
       // If this pos is in the margin
       if (d <= r) {
         // Check the mask
@@ -277,6 +304,7 @@ bool MozaItCheckPos(MozaIt *moz, short *pos, float size, bool *mask,
       }
     }
   }
+  VecFree(&p);
   // Complete the calculation of the average delta of color
   for (int iRGB = 0; iRGB < 3; ++iRGB)
     avg[iRGB] /= sum;
@@ -296,7 +324,7 @@ bool MozaItCheckPos(MozaIt *moz, short *pos, float size, bool *mask,
 
 // Draw one tile of siwe 'siwe' centered at 'pos' in TGA 'tga' and update
 // the mask 'mask'
-void MozaItDrawTile(MozaIt *moz, short *pos, float size, bool *mask, 
+void MozaItDrawTile(MozaIt *moz, VecShort *pos, float size, bool *mask, 
   TGA *src, TGA *tga) {
   // Declare a variable to memorize the size of the square covering the 
   // tile
@@ -304,13 +332,18 @@ void MozaItDrawTile(MozaIt *moz, short *pos, float size, bool *mask,
   // Get the pixel in the source image at center of tile
   TGAPixel *pixel = TGAGetPix(src, pos);
   // For each pixel in the square covering the tile
-  short p[2];
-  for (p[0] = pos[0] - r; p[0] <= pos[0] + r; ++(p[0])) {
-    for (p[1] = pos[1] - r; p[1] <= pos[1] + r; ++(p[1])) {
+  VecShort *p = VecShortCreate(2);
+  for (VecSet(p, 0, VecGet(pos, 0) - r); 
+    VecGet(p, 0) <= VecGet(pos, 0) + r; 
+    VecSet(p, 0, VecGet(p, 0) + 1)) {
+    for (VecSet(p, 1, VecGet(pos, 1) - r); 
+      VecGet(p, 1) <= VecGet(pos, 1) + r; 
+      VecSet(p, 1, VecGet(p, 1) + 1)) {
       // Get the index of this position
-      int index = p[1] * src->_header->_width + p[0];
+      int index = VecGet(p, 1) * src->_header->_width + VecGet(p, 0);
       // Calculate the distance to the center
-      float d = sqrt(pow(pos[0] - p[0], 2.0) + pow(pos[1] - p[1], 2.0));
+      float d = sqrt(pow(VecGet(pos, 0) - VecGet(p, 0), 2.0) + 
+        pow(VecGet(pos, 1) - VecGet(p, 1), 2.0));
       // If this pos is in the tile
       if (d <= size) {
         // Get the pixel in the result image at current pos
